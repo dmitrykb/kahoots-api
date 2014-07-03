@@ -1,0 +1,4 @@
+*.pyc
+
+gc-server.sublime-project
+gc-server.sublime-workspace
