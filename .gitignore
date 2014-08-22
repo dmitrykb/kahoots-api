@@ -1,4 +1,6 @@
 *.pyc
+*.log
+.DS_Store
 
 gc-server.sublime-project
 gc-server.sublime-workspace
