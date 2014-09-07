@@ -2,8 +2,6 @@ from facebook_oauth_provider import FacebookOAuthProvider
 
 class OAuthProviderFactory():
 
-    providers = ['FACEBOOK', 'GOOGLE', 'GEEKCHAT']
-
     @staticmethod
     def create_provider(oauth_provider, auth_token):
         if oauth_provider == 'FACEBOOK':

@@ -25,7 +25,11 @@ def load_sqla(handler):
         web.ctx.orm.commit()
 
 urls = (
-        '/api/v1/login', 'api.v1.controllers.login.Login')
+        '/api/v1/login', 'api.v1.controllers.login.Login',
+        '/api/v1/posts', 'api.v1.controllers.posts.Posts',
+        '/api/v1/posts/([0-9]+)', 'api.v1.controllers.post.Post')
+
+
 
 app = web.application(urls, globals(), autoreload=True)
 app.add_processor(load_sqla)
