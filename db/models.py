@@ -1,14 +1,20 @@
 import hashlib
 
 from sqlalchemy import create_engine, func
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
+from sqlalchemy.orm import relationship, backref, relation
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects import mysql
 
 
 
 Base = declarative_base()
+
+friends = Table(
+    'friends', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True)
+    )
 
 class User(Base):
     __tablename__ = 'users'
@@ -22,6 +28,13 @@ class User(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     username = Column(String(50))
+
+
+    following = relation(
+        "User",secondary = friends,
+        primaryjoin = friends.c.user_id == id,
+        secondaryjoin = friends.c.friend_id == id,
+        backref = "followers")
 
     def as_dict(self):
         user = {

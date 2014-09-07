@@ -42,4 +42,8 @@ class Posts(AuthController):
         # save new post
         web.ctx.orm.add(post)
         web.ctx.orm.commit()        
+
+        followers = self.user.followers
+        following = self.user.following
+
         return json.dumps(post.as_dict())

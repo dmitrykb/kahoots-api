@@ -24,7 +24,7 @@ class Login():
 
         # check if auth_token already exists in our database
         auth_token = web.ctx.orm.query(AuthToken).filter_by(token=params.auth_token).join(User).first()
-        if auth_token and auth_token.user:
+        if auth_token and auth_token.user:            
             return json.dumps(auth_token.user.as_dict())
 
         # check if push_token and user exist
