@@ -1,6 +1,5 @@
 import web
 import json
-import hashlib
 from api.v1.controllers.decorators import validate
 from parser import Scraper
 from db.models import *
@@ -13,41 +12,34 @@ class Posts(AuthController):
     post_schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
                    {'name': 'url', 'type': 'string', 'required':True},
                    {'name': 'force_publish', 'type': 'enum','allowed_values': ['1','0'], 'required':False}]
-
     @validate(post_schema)
-    @AuthController.authorize
+    @AuthController.authorize # sets self.user
     def POST(self):
+        '''
+            create new post
+        '''
         params = web.input()
-        # try:
-        scraper = Scraper(params.url)
-        scraper.parse()
-        scraped_post = scraper.as_dict()
-        # except:
-        #     http_errors.bad_request('Bad url.')
+        try:
+            scraper = Scraper(params.url)
+            scraper.parse()
+        except:
+            http_errors.bad_request('Bad url.')
 
         post = Post()
         post.user_id = self.user.id
-        post.title = scraped_post['title']
-        post.description = scraped_post['description']
-        post.image = scraped_post['image']
-        post.host = scraped_post['host']
-        post.type = scraped_post['type']
-        post.site_name = scraped_post['site_name']
-        post.site_icon = scraped_post['site_icon']
-        post.url = scraped_post['url']
-        post.hash = self.checksum(post)
-
+        post.title = scraper.data['title']
+        post.description = scraper.data['description']
+        post.image = scraper.data['image']
+        post.host = scraper.data['host']
+        post.type = scraper.data['type']
+        post.site_name = scraper.data['site_name']
+        post.site_icon = scraper.data['site_icon']
+        post.url = scraper.data['url']
+        post.charset = scraper.data['charset']        
         post.is_published = False if 'force_publish' not in params else params.force_publish
+        post.hash = post.generate_sum()
+
+        # save new post
         web.ctx.orm.add(post)
         web.ctx.orm.commit()        
         return json.dumps(post.as_dict())
-
-    
-
-    def checksum(self, post):
-        m = hashlib.md5()
-        m.update(post.title + post.host)
-        return m.hexdigest()
-
-
-    

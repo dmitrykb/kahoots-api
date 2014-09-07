@@ -1,3 +1,5 @@
+import hashlib
+
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
@@ -64,6 +66,7 @@ class AuthToken(Base):
     push_token = relationship('PushToken', backref='auth_tokens')
     user = relationship('User', backref='auth_tokens')
 
+
 class Post(Base):
     __tablename__ = 'posts'
 
@@ -79,10 +82,17 @@ class Post(Base):
     site_name = Column(String(255), nullable = True)
     site_icon = Column(String(2083), nullable = True)
     hash = Column(String(255), nullable = True)
+    charset = Column(String(20), nullable = True)
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
     updated_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())    
     is_published = Column(Boolean, nullable = False, default = False)
     user = relationship('User', backref='posts')
+
+    def generate_sum(self):
+        m = hashlib.md5()
+        m.update(self.title + self.host)
+        return m.hexdigest()
+
 
     def as_dict(self):
         post = {
@@ -96,6 +106,7 @@ class Post(Base):
                 'site_name': self.site_name,
                 'site_icon': self.site_icon,
                 'hash': self.hash,
+                'charset': self.charset,
                 'created_timestamp': str(self.created_timestamp),
                 'updated_timestamp': str(self.updated_timestamp),
                 'is_published': self.is_published}
