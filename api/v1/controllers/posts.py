@@ -60,10 +60,6 @@ class Posts(AuthController):
     @validate(get_schema)
     @AuthController.authorize # sets self.user
     def GET(self):
-        '''
-            create new post
-        '''
-
         params = web.input()
         limit = 10 if 'limit' not in params else params.limit
         try:
