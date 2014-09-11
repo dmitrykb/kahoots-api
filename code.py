@@ -26,6 +26,8 @@ def load_sqla(handler):
 
 urls = (
         '/api/v1/login', 'api.v1.controllers.login.Login',
+        '/api/v1/users/([0-9]+)/followers', 'api.v1.controllers.followers.Followers',
+        '/api/v1/users/([0-9]+)/following', 'api.v1.controllers.following.Following',
         '/api/v1/posts', 'api.v1.controllers.posts.Posts',
         '/api/v1/posts/([0-9]+)', 'api.v1.controllers.post.Post')
 

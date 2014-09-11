@@ -16,7 +16,7 @@ class FacebookOAuthProvider(BaseOAuthProvider):
         except GraphAPIError as error:
             errors = []
             errors.append(str(error))
-            http_errors.bad_request(errors)
+            http_errors._400(errors)
             raise
         oauth_user = OAuthUser()
         oauth_user.email = profile['email']

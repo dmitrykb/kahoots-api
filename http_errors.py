@@ -1,14 +1,21 @@
 import web
 import json
 
-def bad_request(errors):
+def _400(errors):
     data = {
         "errors": errors
     }
-    raise web.HTTPError("404 Bad Request", data=json.dumps(data))
+    raise web.HTTPError("400 Bad Request", data=json.dumps(data))
 
-def unauthorized():    
+def _401():    
     data = {
-        "errors": '401 Unauthorized. User not found.'
+        "errors": '401 Unauthorized'
     }
     raise web.HTTPError("401 Unauthorized", data=json.dumps(data))
+
+
+def _404():    
+    data = {
+        "errors": '404 Resource not found'
+    }
+    raise web.HTTPError("404 Not Found", data=json.dumps(data))

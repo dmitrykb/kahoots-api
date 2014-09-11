@@ -9,9 +9,10 @@ class AuthController():
     @classmethod
     def authorize(cls, f):        
         def wrapper(self, *args, **kwargs):
+            print self
             if not self.find_user():
-                return http_errors.unauthorized()
-            return f(self)
+                return http_errors._401()
+            return f(self, *args, **kwargs)
         return wrapper
 
 

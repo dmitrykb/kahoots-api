@@ -1,29 +1,36 @@
 import web
 import json
+import datetime
 from api.v1.controllers.decorators import validate
 from parser import Scraper
 from db.models import *
 import urllib2, httplib
 from api.v1.controllers.auth_controller import AuthController
 import http_errors
+from sqlalchemy.sql import and_
 
 class Posts(AuthController):
 
     post_schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
                    {'name': 'url', 'type': 'string', 'required':True},
                    {'name': 'force_publish', 'type': 'enum','allowed_values': ['1','0'], 'required':False}]
+
+    get_schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
+                   {'name': 'limit', 'type': 'int', 'required':False},
+                   {'name': 'since', 'type': 'int', 'required':True}]
+
+    '''
+        create new post
+    '''
     @validate(post_schema)
     @AuthController.authorize # sets self.user
     def POST(self):
-        '''
-            create new post
-        '''
         params = web.input()
         try:
             scraper = Scraper(params.url)
             scraper.parse()
         except:
-            http_errors.bad_request('Bad url.')
+            http_errors._400('Bad url.')
 
         post = Post()
         post.user_id = self.user.id
@@ -43,7 +50,40 @@ class Posts(AuthController):
         web.ctx.orm.add(post)
         web.ctx.orm.commit()        
 
-        followers = self.user.followers
-        following = self.user.following
-
         return json.dumps(post.as_dict())
+
+
+
+    '''
+        get feed
+    '''
+    @validate(get_schema)
+    @AuthController.authorize # sets self.user
+    def GET(self):
+        '''
+            create new post
+        '''
+
+        params = web.input()
+        limit = 10 if 'limit' not in params else params.limit
+        try:
+            since = str(datetime.datetime.fromtimestamp(float(params.since)))
+        except:
+            http_errors._400('Wrong date format.')
+
+        posts = web.ctx.orm.query(Post)\
+            .join(friends, Post.user_id == friends.c.friend_id)\
+            .filter(and_(
+                Post.is_published == True,\
+                Post.created_timestamp > since,\
+                friends.c.user_id == self.user.id\
+                ))\
+            .limit(limit)
+        
+        ret = {u'posts':[]}
+        for post in posts:            
+            post_dict = post.as_dict()
+            post_dict['fiend'] = post.user.as_dict()
+            ret[u'posts'].append(post_dict)
+
+        return json.dumps(ret)

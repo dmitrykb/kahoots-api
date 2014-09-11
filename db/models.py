@@ -1,10 +1,12 @@
 import hashlib
+import time
 
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import relationship, backref, relation
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects import mysql
+
 
 
 
@@ -40,8 +42,8 @@ class User(Base):
         user = {
                 'id': self.id,
                 'email': self.email,
-                'created_timestamp': str(self.created_timestamp),
-                'last_seen_timestamp': str(self.last_seen_timestamp),
+                'created_timestamp': int(time.mktime(self.created_timestamp.timetuple())),
+                'updated_timestamp': int(time.mktime(self.last_seen_timestamp.timetuple())),
                 'is_removed': self.is_removed,
                 'first_name': self.first_name,
                 'last_name': self.last_name,
@@ -120,7 +122,7 @@ class Post(Base):
                 'site_icon': self.site_icon,
                 'hash': self.hash,
                 'charset': self.charset,
-                'created_timestamp': str(self.created_timestamp),
-                'updated_timestamp': str(self.updated_timestamp),
+                'created_timestamp': int(time.mktime(self.created_timestamp.timetuple())),
+                'updated_timestamp': int(time.mktime(self.updated_timestamp.timetuple())),
                 'is_published': self.is_published}
         return post

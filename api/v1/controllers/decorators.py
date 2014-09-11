@@ -8,7 +8,7 @@ class validate(object):
     '''
         @validate(schema)
         Decorator that is used in controller, before each http request
-        Returns controller's method or raises HTTPError 404
+        Returns controller's method or 400 Bad Request
     '''
     def __init__(self, schema):
         self.schema = schema
@@ -18,8 +18,8 @@ class validate(object):
 
             errors = Validator().validate(decorator_self.schema, web.input())
             if len(errors) > 0:
-                #raise 400
-                http_errors.bad_request(errors)
+                # raise 400
+                http_errors._400(errors)
 
             # execute original http method
             return original_func(*args,**kwargs)
