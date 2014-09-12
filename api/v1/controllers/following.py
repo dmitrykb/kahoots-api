@@ -17,6 +17,10 @@ class Following(AuthController):
     @AuthController.authorize # sets self.user
     def GET(self, user_id):
         user = web.ctx.orm.query(User).filter_by(id=user_id).first()
+        # 404
+        if not user:
+            return http_errors._404()
+
         friends = {u'users':[]}
 
         try:

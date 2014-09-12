@@ -4,7 +4,6 @@ import datetime
 from api.v1.controllers.decorators import validate
 from parser import Scraper
 from db.models import *
-import urllib2, httplib
 from api.v1.controllers.auth_controller import AuthController
 import http_errors
 from sqlalchemy.sql import and_
@@ -20,8 +19,9 @@ class Posts(AuthController):
                    {'name': 'since', 'type': 'int', 'required':True}]
 
     '''
-        create new post
+        POST /posts - create new post
     '''
+
     @validate(post_schema)
     @AuthController.authorize # sets self.user
     def POST(self):
@@ -55,8 +55,9 @@ class Posts(AuthController):
 
 
     '''
-        get feed
+        GET /posts - get feed 
     '''
+
     @validate(get_schema)
     @AuthController.authorize # sets self.user
     def GET(self):
@@ -78,8 +79,6 @@ class Posts(AuthController):
         
         ret = {u'posts':[]}
         for post in posts:            
-            post_dict = post.as_dict()
-            post_dict['fiend'] = post.user.as_dict()
-            ret[u'posts'].append(post_dict)
+            ret[u'posts'].append(post.as_dict())
 
         return json.dumps(ret)
