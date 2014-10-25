@@ -5,7 +5,7 @@ from api.v1.controllers.decorators import validate
 from db.models import *
 from api.v1.auth.oauth_provider_factory import OAuthProviderFactory
 
-class Login():
+class Users():
 
     schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
               {'name': 'oauth_provider', 'type': 'enum', 'allowed_values': AuthToken.providers, 'required':True},

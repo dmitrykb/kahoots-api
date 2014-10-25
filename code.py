@@ -25,7 +25,7 @@ def load_sqla(handler):
         web.ctx.orm.commit()
 
 urls = (
-        '/api/v1/login', 'api.v1.controllers.login.Login',
+        '/api/v1/users', 'api.v1.controllers.users.Users',
         '/api/v1/users/([0-9]+)/followers', 'api.v1.controllers.followers.Followers',
         '/api/v1/users/([0-9]+)/following', 'api.v1.controllers.following.Following',
         '/api/v1/users/([0-9]+)/posts', 'api.v1.controllers.user_posts.UserPosts',

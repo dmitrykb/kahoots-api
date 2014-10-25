@@ -105,7 +105,7 @@ class Post(Base):
 
     def generate_sum(self):
         m = hashlib.md5()
-        m.update(self.title + self.host)
+        m.update(`self.title` + self.host)
         return m.hexdigest()
 
 
