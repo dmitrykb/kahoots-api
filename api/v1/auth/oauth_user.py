@@ -8,6 +8,7 @@ class OAuthUser():
         self.timezone = None
         self.remote_id = None
         self.remote_avatar_url = None
+        is_silhouette = True
 
 
     def as_dict(self):
@@ -18,5 +19,6 @@ class OAuthUser():
                 'gender': self.gender,
                 'timezone': self.timezone,
                 'remote_id': self.remote_id,
+                'is_silhouette': self.is_silhouette,
                 'remote_avatar_url': self.remote_avatar_url}
         return user

@@ -29,12 +29,21 @@ class Validator():
                 param.regex = field['regex']
             self.params.append(param)
             
-    def validate(self, schema, data):
+    def validate(self, schema, post, get, headers):
+        try:
+            post = json.loads(post)
+        except:
+            pass
+
         self.parse_schema(schema)
 
         for param in self.params:
-            if param.name in data:
-                param.value = data[param.name]
+            if param.name in post:
+                param.value = post[param.name]
+            elif param.name in get:
+                param.value = get[param.name]
+            elif param.name in headers:
+                param.value = headers[param.name]
             param.validate()
             if param.get_error_message():
                 self.errors.append(param.get_error_message())

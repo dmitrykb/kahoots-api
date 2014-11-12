@@ -5,6 +5,7 @@ def _400(errors):
     data = {
         "errors": errors
     }
+    print 'error 400'
     raise web.HTTPError("400 Bad Request", data=json.dumps(data))
 
 def _401():    

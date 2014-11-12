@@ -10,13 +10,15 @@ from sqlalchemy.sql import and_
 
 class Posts(AuthController):
 
-    post_schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
+    post_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
                    {'name': 'url', 'type': 'string', 'required':True},
                    {'name': 'force_publish', 'type': 'enum','allowed_values': ['1','0'], 'required':False}]
 
-    get_schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
+    get_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
                    {'name': 'limit', 'type': 'int', 'required':False},
-                   {'name': 'since', 'type': 'int', 'required':True}]
+                   {'name': 'since', 'type': 'int', 'required':True},
+                   # default gt: return posts that are later than 'since' param
+                   {'name': 'direction', 'type': 'enum','allowed_values': ['gt','lt'], 'required':False}]
 
     '''
         POST /posts - create new post
@@ -25,9 +27,9 @@ class Posts(AuthController):
     @validate(post_schema)
     @AuthController.authorize # sets self.user
     def POST(self):
-        params = web.input()
+        params = json.loads(web.data())
         try:
-            scraper = Scraper(params.url)
+            scraper = Scraper(params['url'])
             scraper.parse()
         except:
             http_errors._400('Bad url.')
@@ -43,7 +45,7 @@ class Posts(AuthController):
         post.site_icon = scraper.data['site_icon']
         post.url = scraper.data['url']
         post.charset = scraper.data['charset']        
-        post.is_published = False if 'force_publish' not in params else params.force_publish
+        post.is_published = True if 'force_publish' not in params else params['force_publish']
         post.hash = post.generate_sum()
 
         # save new post
@@ -62,23 +64,74 @@ class Posts(AuthController):
     @AuthController.authorize # sets self.user
     def GET(self):
         params = web.input()
-        limit = 10 if 'limit' not in params else params.limit
+        limit = 0 if 'limit' not in params else int(params['limit'])
+
         try:
-            since = str(datetime.datetime.fromtimestamp(float(params.since)))
+            since = str(datetime.datetime.fromtimestamp(float(params['since'])))
         except:
             http_errors._400('Wrong date format.')
 
-        posts = web.ctx.orm.query(Post)\
-            .join(friends, Post.user_id == friends.c.friend_id)\
-            .filter(and_(
-                Post.is_published == True,\
-                Post.created_timestamp > since,\
-                friends.c.user_id == self.user.id\
-                ))\
-            .limit(limit)
-        
-        ret = {u'posts':[]}
+        # OPTIMIZE THIS AND COVER WITH TESTS        
+        if 'direction' not in params or params['direction'] == 'gt':
+            posts = self.get_gt(since, limit)
+        else:
+            posts = self.get_lt(since, limit)
+        ret = []
         for post in posts:            
-            ret[u'posts'].append(post.as_dict())
+            ret.append(post.as_dict())
+        return json.dumps(ret[::-1]) # reversed
 
-        return json.dumps(ret)
+
+    def get_gt(self, since, limit):
+        if limit > 0:
+            posts = web.ctx.orm.query(Post)\
+                .join(friends, Post.user_id == friends.c.friend_id)\
+                .filter(\
+                    and_(\
+                        Post.is_published == True,\
+                        Post.created_timestamp > since,\
+                        friends.c.user_id == self.user.id\
+                    )\
+                )\
+                .order_by(Post.created_timestamp.desc())\
+                .limit(limit)
+        else:
+            posts = web.ctx.orm.query(Post)\
+                .join(friends, Post.user_id == friends.c.friend_id)\
+                .filter(\
+                    and_(\
+                        Post.is_published == True,\
+                        Post.created_timestamp > since,\
+                        friends.c.user_id == self.user.id\
+                    )\
+                )\
+                .order_by(Post.created_timestamp.desc())\
+                .all()
+        return posts
+
+    def get_lt(self, since, limit):
+        if limit > 0:
+            posts = web.ctx.orm.query(Post)\
+                .join(friends, Post.user_id == friends.c.friend_id)\
+                .filter(\
+                    and_(\
+                        Post.is_published == True,\
+                        Post.created_timestamp < since,\
+                        friends.c.user_id == self.user.id\
+                    )\
+                )\
+                .order_by(Post.created_timestamp.desc())\
+                .limit(limit)
+        else:
+            posts = web.ctx.orm.query(Post)\
+                .join(friends, Post.user_id == friends.c.friend_id)\
+                .filter(\
+                    and_(\
+                        Post.is_published == True,\
+                        Post.created_timestamp < since,\
+                        friends.c.user_id == self.user.id\
+                    )\
+                )\
+                .order_by(Post.created_timestamp.desc())\
+                .all()                
+        return posts

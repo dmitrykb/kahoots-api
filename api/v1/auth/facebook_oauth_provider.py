@@ -13,6 +13,8 @@ class FacebookOAuthProvider(BaseOAuthProvider):
         graph = GraphAPI(self.auth_token)
         try:
             profile = graph.get_object('me')
+            picture = graph.get_object('me/picture?redirect=false&width=9999')
+            print `picture`
         except GraphAPIError as error:
             errors = []
             errors.append(str(error))
@@ -25,4 +27,6 @@ class FacebookOAuthProvider(BaseOAuthProvider):
         oauth_user.gender = profile['gender']
         oauth_user.timezone = profile['timezone']
         oauth_user.remote_id = profile['id']
+        oauth_user.remote_avatar_url = picture['data']['url']
+        oauth_user.is_silhouette = picture['data']['is_silhouette']
         return oauth_user

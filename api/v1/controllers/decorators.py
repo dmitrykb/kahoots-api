@@ -16,7 +16,7 @@ class validate(object):
         decorator_self = self
         def wrappee( *args, **kwargs):
 
-            errors = Validator().validate(decorator_self.schema, web.input())
+            errors = Validator().validate(decorator_self.schema, web.data(), web.input(), web.ctx.env)
             if len(errors) > 0:
                 # raise 400
                 http_errors._400(errors)

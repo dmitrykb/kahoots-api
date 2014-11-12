@@ -26,7 +26,7 @@ class User(Base):
     email = Column(String(70), nullable = False)
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
     last_seen_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())
-    is_removed = Column(Boolean, nullable = False, default = False, onupdate=func.current_timestamp())
+    is_removed = Column(Boolean, nullable = False, default = False)
     first_name = Column(String(50))
     last_name = Column(String(50))
     username = Column(String(50))
@@ -42,12 +42,19 @@ class User(Base):
         user = {
                 'id': self.id,
                 'email': self.email,
-                'created_timestamp': int(time.mktime(self.created_timestamp.timetuple())),
-                'updated_timestamp': int(time.mktime(self.last_seen_timestamp.timetuple())),
+                'created_date': int(time.mktime(self.created_timestamp.timetuple())),
+                'updated_date': int(time.mktime(self.last_seen_timestamp.timetuple())),
                 'is_removed': self.is_removed,
                 'first_name': self.first_name,
                 'last_name': self.last_name,
-                'username': self.username}
+                'username': self.username,
+                'avatar':{
+                    'url': self.avatars[-1].url,
+                    'is_silhouette': self.avatars[-1].is_silhouette,
+                    'created_date': int(time.mktime(self.avatars[-1].created_timestamp.timetuple()))
+                    }
+                
+                }
         return user
 
 class PushToken(Base):
@@ -80,6 +87,17 @@ class AuthToken(Base):
 
     push_token = relationship('PushToken', backref='auth_tokens')
     user = relationship('User', backref='auth_tokens')
+
+class Avatar(Base):
+    __tablename__ = 'avatars'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable = False)
+    remote_url = Column(String(256), nullable = False, default = 0)
+    is_silhouette = Column(Boolean, nullable = False, default = False)
+    url = Column(String(256), nullable = False, default = 0)
+    created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
+    user = relationship('User', backref='avatars')    
 
 
 class Post(Base):
@@ -122,7 +140,7 @@ class Post(Base):
                 'site_icon': self.site_icon,
                 'hash': self.hash,
                 'charset': self.charset,
-                'created_timestamp': int(time.mktime(self.created_timestamp.timetuple())),
-                'updated_timestamp': int(time.mktime(self.updated_timestamp.timetuple())),
+                'created_date': int(time.mktime(self.created_timestamp.timetuple())),
+                'created_date': int(time.mktime(self.updated_timestamp.timetuple())),
                 'is_published': self.is_published}
         return post

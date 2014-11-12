@@ -8,7 +8,7 @@ import json
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 
-engine = create_engine('mysql+mysqlconnector://root:qwerty@localhost/gc', echo=True)
+engine = create_engine('mysql+mysqlconnector://root:qwerty@localhost/gc', echo=False)
 
 def load_sqla(handler):
     web.ctx.orm = scoped_session(sessionmaker(bind=engine))
@@ -16,9 +16,11 @@ def load_sqla(handler):
     try:
         return handler()
     except web.HTTPError:
+        print 'httperror'
         web.ctx.orm.rollback()
         raise
     except:
+        print 'error'
         web.ctx.orm.rollback()
         raise
     finally:

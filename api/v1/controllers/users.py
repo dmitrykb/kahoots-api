@@ -7,7 +7,7 @@ from api.v1.auth.oauth_provider_factory import OAuthProviderFactory
 
 class Users():
 
-    schema = [{'name': 'auth_token', 'type': 'string', 'required':True},
+    schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
               {'name': 'oauth_provider', 'type': 'enum', 'allowed_values': AuthToken.providers, 'required':True},
               {'name': 'expires_in_sec', 'type': 'string', 'required':True},
               {'name': 'push_token', 'type': 'string', 'required':True},
@@ -18,31 +18,31 @@ class Users():
 
     @validate(schema)
     def POST(self):
-
         # parse parameters
-        params = web.input()
+        params = json.loads(web.data())
+        headers = web.ctx.env
 
         # check if auth_token already exists in our database
-        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=params.auth_token).join(User).first()
+        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTH_TOKEN']).join(User).first()
         if auth_token and auth_token.user:            
             return json.dumps(auth_token.user.as_dict())
 
         # check if push_token and user exist
-        push_token = web.ctx.orm.query(PushToken).filter_by(token=params.push_token).join(User).first()
+        push_token = web.ctx.orm.query(PushToken).filter_by(token=params['push_token']).join(User).first()
         if push_token and push_token.user:
             auth_token = AuthToken()
-            auth_token.token = params.auth_token
-            auth_token.oauth_provider = params.oauth_provider
-            auth_token.expires_in_sec = params.expires_in_sec
+            auth_token.token = headers['HTTP_AUTH_TOKEN']
+            auth_token.oauth_provider = params['oauth_provider']
+            auth_token.expires_in_sec = params['expires_in_sec']
             auth_token.push_token_id = push_token.id
             push_token.user.auth_tokens.append(auth_token)
             web.ctx.orm.add(push_token.user)
             web.ctx.orm.commit()
             return json.dumps(push_token.user.as_dict())
 
-
+        
         # create oauth provider, based on oauth provider
-        oauth_provider = OAuthProviderFactory.create_provider(auth_token = params.auth_token, oauth_provider = params.oauth_provider)
+        oauth_provider = OAuthProviderFactory.create_provider(auth_token = headers['HTTP_AUTH_TOKEN'], oauth_provider = params['oauth_provider'])
         oauth_user = oauth_provider.login()
 
         # check if user with oauth_user.email is already regostered the database
@@ -50,17 +50,22 @@ class Users():
 
         # save new auth_token
         auth_token = AuthToken()
-        auth_token.token = params.auth_token
-        auth_token.oauth_provider = params.oauth_provider
-        auth_token.expires_in_sec = params.expires_in_sec
+        auth_token.token = headers['HTTP_AUTH_TOKEN']
+        auth_token.oauth_provider = params['oauth_provider']
+        auth_token.expires_in_sec = params['expires_in_sec']
 
         # save new push_token
-        push_token = PushToken()
-        push_token.token = params.push_token
-        push_token.client_type = params.client_type
-        push_token.client_version = params.client_version
-        push_token.auth_tokens.append(auth_token)
+        avatar = Avatar()
+        avatar.remote_url = oauth_user.remote_avatar_url
+        avatar.url = oauth_user.remote_avatar_url
+        avatar.is_silhouette = oauth_user.is_silhouette
 
+        # save new avatar
+        push_token = PushToken()
+        push_token.token = params['push_token']
+        push_token.client_type = params['client_type']
+        push_token.client_version = params['client_version']
+        push_token.auth_tokens.append(auth_token)
 
         if not user:
             # create new user in database
@@ -71,6 +76,7 @@ class Users():
 
         user.push_tokens.append(push_token)
         user.auth_tokens.append(auth_token)
+        user.avatars.append(avatar)
         web.ctx.orm.add(user)
         web.ctx.orm.commit()
 
