@@ -4,6 +4,7 @@ import json
 from api.v1.controllers.decorators import validate
 from db.models import *
 from api.v1.auth.oauth_provider_factory import OAuthProviderFactory
+from sqlalchemy.sql import and_, or_
 
 class Users():
 
@@ -13,8 +14,6 @@ class Users():
               {'name': 'push_token', 'type': 'string', 'required':True},
               {'name': 'client_type', 'type': 'enum', 'allowed_values': ['IOS','ANDROID'], 'required':True},
               {'name': 'client_version', 'type': 'string', 'required':True}]
-
-
 
     @validate(schema)
     def POST(self):
@@ -81,3 +80,48 @@ class Users():
         web.ctx.orm.commit()
 
         return json.dumps(user.as_dict())
+
+
+    get_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True}]
+    @validate(get_schema)
+    def GET(self, pattern):
+        '''
+            search users by @pattern [\W\w]+
+        '''
+
+        pattern = '%' + pattern + '%'
+        users = web.ctx.orm.query(User)\
+                    .filter(\
+                        and_(
+                            or_(User.email.like(pattern),\
+                                User.username.like(pattern),\
+                                User.first_name.like(pattern),\
+                                User.last_name.like(pattern)\
+                                ),\
+                               User.is_removed == False 
+                            )
+                        ).limit(30)
+        ret = {u'users':[]}
+        for user in users:
+            ret[u'users'].append(user.as_dict())
+
+        return json.dumps(ret)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
