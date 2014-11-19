@@ -20,7 +20,7 @@ class AuthController():
     def find_user(self):
         # check if auth_token already exists in our database
         headers = web.ctx.env
-        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTH_TOKEN']).join(User).first()
+        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTHTOKEN']).join(User).first()
         if auth_token and auth_token.user:
             self.user = auth_token.user
             return True

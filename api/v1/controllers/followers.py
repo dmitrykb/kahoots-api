@@ -7,7 +7,7 @@ import http_errors
 
 class Followers(AuthController):
 
-    get_schema = [{'name': 'auth_token', 'type': 'string', 'required':True}]
+    get_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True}]
     @validate(get_schema)
     @AuthController.authorize # sets self.user
     def GET(self, user_id):
@@ -16,12 +16,11 @@ class Followers(AuthController):
         '''
 
         user = web.ctx.orm.query(User).filter_by(id=user_id).first()
-        followers = {u'users':[]}
-
+        ret = []
         try:
             for user in user.followers:
-                followers[u'users'].append(user.as_dict())
-            return json.dumps(followers)                
+                ret.append(user.as_dict())
+            return json.dumps(ret)                
         except AttributeError:
             #404
             return http_errors._400()

@@ -36,7 +36,6 @@ class Validator():
             pass
 
         self.parse_schema(schema)
-
         for param in self.params:
             if param.name in post:
                 param.value = post[param.name]

@@ -8,7 +8,7 @@ from sqlalchemy.sql import and_, or_
 
 class Users():
 
-    schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
+    schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True},
               {'name': 'oauth_provider', 'type': 'enum', 'allowed_values': AuthToken.providers, 'required':True},
               {'name': 'expires_in_sec', 'type': 'string', 'required':True},
               {'name': 'push_token', 'type': 'string', 'required':True},
@@ -22,7 +22,7 @@ class Users():
         headers = web.ctx.env
 
         # check if auth_token already exists in our database
-        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTH_TOKEN']).join(User).first()
+        auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTHTOKEN']).join(User).first()
         if auth_token and auth_token.user:            
             return json.dumps(auth_token.user.as_dict())
 
@@ -30,7 +30,7 @@ class Users():
         push_token = web.ctx.orm.query(PushToken).filter_by(token=params['push_token']).join(User).first()
         if push_token and push_token.user:
             auth_token = AuthToken()
-            auth_token.token = headers['HTTP_AUTH_TOKEN']
+            auth_token.token = headers['HTTP_AUTHTOKEN']
             auth_token.oauth_provider = params['oauth_provider']
             auth_token.expires_in_sec = params['expires_in_sec']
             auth_token.push_token_id = push_token.id
@@ -41,7 +41,7 @@ class Users():
 
         
         # create oauth provider, based on oauth provider
-        oauth_provider = OAuthProviderFactory.create_provider(auth_token = headers['HTTP_AUTH_TOKEN'], oauth_provider = params['oauth_provider'])
+        oauth_provider = OAuthProviderFactory.create_provider(auth_token = headers['HTTP_AUTHTOKEN'], oauth_provider = params['oauth_provider'])
         oauth_user = oauth_provider.login()
 
         # check if user with oauth_user.email is already regostered the database
@@ -49,7 +49,7 @@ class Users():
 
         # save new auth_token
         auth_token = AuthToken()
-        auth_token.token = headers['HTTP_AUTH_TOKEN']
+        auth_token.token = headers['HTTP_AUTHTOKEN']
         auth_token.oauth_provider = params['oauth_provider']
         auth_token.expires_in_sec = params['expires_in_sec']
 
@@ -82,9 +82,10 @@ class Users():
         return json.dumps(user.as_dict())
 
 
-    get_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True}]
+    get_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True}]
     @validate(get_schema)
     def GET(self, pattern):
+
         '''
             search users by @pattern [\W\w]+
         '''
@@ -101,9 +102,9 @@ class Users():
                                User.is_removed == False 
                             )
                         ).limit(30)
-        ret = {u'users':[]}
+        ret = []
         for user in users:
-            ret[u'users'].append(user.as_dict())
+            ret.append(user.as_dict())
 
         return json.dumps(ret)
 

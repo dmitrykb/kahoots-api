@@ -7,8 +7,8 @@ import http_errors
 
 class Following(AuthController):
 
-    get_schema = [{'name': 'auth_token', 'type': 'string', 'required':True}]
-    post_schema = [{'name': 'auth_token', 'type': 'string', 'required':True}]
+    get_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True}]
+    post_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True}]
 
     '''
         get list of friends (users, I follow)
@@ -20,13 +20,11 @@ class Following(AuthController):
         # 404
         if not user:
             return http_errors._404()
-
-        friends = {u'users':[]}
-
+        ret = []
         try:
             for user in user.following:
-                friends[u'users'].append(user.as_dict())
-            return json.dumps(friends)                
+                ret.append(user.as_dict())
+            return json.dumps(ret)                
         except AttributeError:
             # 404
             return http_errors._404()

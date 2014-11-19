@@ -10,11 +10,11 @@ from sqlalchemy.sql import and_
 
 class Posts(AuthController):
 
-    post_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
+    post_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True},
                    {'name': 'url', 'type': 'string', 'required':True},
                    {'name': 'force_publish', 'type': 'enum','allowed_values': ['1','0'], 'required':False}]
 
-    get_schema = [{'name': 'HTTP_AUTH_TOKEN', 'type': 'string', 'required':True},
+    get_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True},
                    {'name': 'limit', 'type': 'int', 'required':False},
                    {'name': 'since', 'type': 'int', 'required':True},
                    # default gt: return posts that are later than 'since' param

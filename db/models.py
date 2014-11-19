@@ -48,13 +48,15 @@ class User(Base):
                 'first_name': self.first_name,
                 'last_name': self.last_name,
                 'username': self.username,
-                'avatar':{
-                    'url': self.avatars[-1].url,
-                    'is_silhouette': self.avatars[-1].is_silhouette,
-                    'created_date': int(time.mktime(self.avatars[-1].created_timestamp.timetuple()))
-                    }
-                
                 }
+        if len(self.avatars) > 0:
+            user['avatar'] = {
+                'id': self.avatars[-1].id,
+                'url': self.avatars[-1].url,
+                'is_silhouette': self.avatars[-1].is_silhouette,
+                'created_date': int(time.mktime(self.avatars[-1].created_timestamp.timetuple()))
+            }
+
         return user
 
 class PushToken(Base):
