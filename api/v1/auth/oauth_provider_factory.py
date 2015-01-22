@@ -8,7 +8,7 @@ class OAuthProviderFactory():
             return FacebookOAuthProvider(auth_token)
         elif oauth_provider == 'GOOGLE':
             return ""
-        elif oauth_provider == 'GEEKCHAT':
+        elif oauth_provider == 'KAHOOTS':
             return ""
 
         raise TypeError('Unknown Provider : \'' + oauth_provider + '\'. Allowed providers: ' + str(OAuthProviderFactory.providers))
