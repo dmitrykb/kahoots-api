@@ -72,6 +72,8 @@ class Users():
             user.email = oauth_user.email
             user.first_name = oauth_user.first_name
             user.last_name = oauth_user.last_name
+            # follow yourself
+            user.following.append(user)
 
         user.push_tokens.append(push_token)
         user.auth_tokens.append(auth_token)
