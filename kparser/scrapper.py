@@ -5,7 +5,7 @@ import cgi
 from bs4 import BeautifulSoup
 from urlparse import urlparse
 
-import parser.opengraph2
+import kparser.opengraph2
 
 
 class Scraper():
