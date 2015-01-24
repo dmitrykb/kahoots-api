@@ -2,7 +2,7 @@ import web
 import json
 import datetime
 from api.v1.controllers.decorators import validate
-from parser import Scraper
+from parser.scrapper import Scraper
 from db.models import *
 from api.v1.controllers.auth_controller import AuthController
 import http_errors
