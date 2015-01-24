@@ -19,7 +19,8 @@ db['host'] = config_ini.get('DB_MAIN', 'DB_HOST', 0)
 db['user'] = config_ini.get('DB_MAIN', 'DB_USER', 0)
 db['password'] = config_ini.get('DB_MAIN', 'DB_PASSWORD', 0)
 db['database'] = config_ini.get('DB_MAIN', 'DB_DATABASE', 0)
-db_config['raise_on_warnings'] = config_ini.getboolean('DB_MAIN', 'RAISE_ON_WARNINGS')
+db['raise_on_warnings'] = config_ini.getboolean('DB_MAIN', 'RAISE_ON_WARNINGS')
+db_url='mysql+mysqlconnector://{0}:{1}@{2}/{3}'.format(db['user'], db['password'], db['host'], db['database']) 
 
 # facebook auth
 client_id = config_ini.get('FACEBOOK_APP', 'CLIENT_ID', 0)
