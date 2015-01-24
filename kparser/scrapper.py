@@ -35,7 +35,7 @@ class Scraper():
 
     def scrap_html(self, raw_html):
         soup = BeautifulSoup(raw_html)
-        parsed = opengraph2.OpenGraph2(html=soup, scrape = True)
+        parsed = kparser.opengraph2.OpenGraph2(html=soup, scrape = True)
         return parsed
 
     def build(self, parsed):
