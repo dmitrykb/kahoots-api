@@ -101,7 +101,7 @@ class Users():
                                 ),\
                                User.is_removed == False 
                             )
-                        ).limit(30)
+                        ).limit(15)
         ret = []
         for user in users:
             ret.append(user.as_dict())

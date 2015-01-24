@@ -76,7 +76,7 @@ class PushToken(Base):
 class AuthToken(Base):
     __tablename__ = 'auth_tokens'
 
-    providers = ['FACEBOOK', 'GOOGLE', 'GEEKCHAT']
+    providers = ['FACEBOOK', 'GOOGLE', 'KAHOOTS']
 
     id = Column(Integer, primary_key=True)
     push_token_id = Column(Integer, ForeignKey('push_tokens.id'), nullable = False)
