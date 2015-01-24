@@ -88,8 +88,8 @@ class Posts(AuthController):
                 .join(friends, Post.user_id == friends.c.friend_id)\
                 .filter(\
                     and_(\
-                        friends.c.user_id == self.user.id,\                        
-                        Post.is_published == True,\                        
+                        friends.c.user_id == self.user.id,\
+                        Post.is_published == True,\
                         Post.created_timestamp > since\
                     )\
                 )\
@@ -103,7 +103,6 @@ class Posts(AuthController):
                         friends.c.user_id == self.user.id,\
                         Post.is_published == True,\
                         Post.created_timestamp > since\
-                        
                     )\
                 )\
                 .order_by(Post.created_timestamp.desc())\
@@ -116,7 +115,7 @@ class Posts(AuthController):
                 .join(friends, Post.user_id == friends.c.friend_id)\
                 .filter(\
                     and_(\
-                        friends.c.user_id == self.user.id\
+                        friends.c.user_id == self.user.id,\
                         Post.is_published == True,\
                         Post.created_timestamp < since\
                     )\
