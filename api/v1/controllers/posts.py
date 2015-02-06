@@ -28,15 +28,11 @@ class Posts(AuthController):
     @AuthController.authorize # sets self.user
     def POST(self):
         params = json.loads(web.data())
-        # try:
-        #     scraper = Scraper(params['url'])
-        #     scraper.parse()
-        # except:
-        #     http_errors._400('Bad url.')
-
-        scraper = Scraper(params['url'])
-        scraper.parse()
-
+        try:
+            scraper = Scraper(params['url'])
+            scraper.parse()
+        except:
+            http_errors._400('Bad url.')
 
         post = Post()
         post.user_id = self.user.id
