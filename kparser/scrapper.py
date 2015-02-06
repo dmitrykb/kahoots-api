@@ -1,6 +1,7 @@
 import StringIO
 import gzip
 import urllib2
+import urllib
 import cgi
 from bs4 import BeautifulSoup
 from urlparse import urlparse
@@ -20,7 +21,12 @@ class Scraper():
 
 
     def request_url(self, url):
-        response = urllib2.urlopen(url)
+
+        hdr = {'User-Agent': 'Mozilla/5.0'}
+        req = urllib2.Request(url, headers=hdr)
+        response = urllib2.urlopen(req)
+
+
         _, params = cgi.parse_header(response.headers.get('Content-Type', ''))
         self.data['charset'] = params.get('charset', 'utf-8')
         encoding = response.info().get('Content-Encoding')
@@ -31,6 +37,10 @@ class Scraper():
         else:
             data = response.read()
         return data
+
+    def get(self, param, default = ''):
+        return self.data.get(param, default)
+
 
 
     def scrap_html(self, raw_html):
@@ -46,27 +56,24 @@ class Scraper():
         self.data['url'] = self.url
 
 
-        if 'site_name' in parsed:
-            self.data['site_name'] = parsed['site_name']
+        self.data['site_name'] = parsed.get('site_name')
 
-        if 'title' in parsed:
-            self.data['title'] = parsed['title']
+        self.data['title'] = parsed.get('title')
 
-        if 'description' in parsed:
-            self.data['description'] = parsed['description']
+        self.data['description'] = parsed.get('description')
 
-        if 'image' in parsed:
-            self.data['image'] = parsed['image']
+        self.data['image'] = parsed.get('image')
 
-        if 'type' in parsed:
-            self.data['type'] = parsed['type']
+        self.data['type'] = parsed.get('type')
 
-        if 'icon' in parsed:
-            self.data['site_icon'] = parsed['icon']
+        self.data['site_icon'] = parsed.get('icon')
 
         # set defaults, if not found in meta
-        if 'title' not in self.data:
+        if not self.data.get('title'):
             self.data['title'] = netloc
 
-        if 'site_name' not in self.data:
+        if not self.data.get('site_name'):
             self.data['site_name'] = netloc
+
+        if  not self.data.get('description'):
+            self.data['description'] = self.data['title']

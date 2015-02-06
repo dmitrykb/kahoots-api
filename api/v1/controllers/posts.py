@@ -28,23 +28,27 @@ class Posts(AuthController):
     @AuthController.authorize # sets self.user
     def POST(self):
         params = json.loads(web.data())
-        try:
-            scraper = Scraper(params['url'])
-            scraper.parse()
-        except:
-            http_errors._400('Bad url.')
+        # try:
+        #     scraper = Scraper(params['url'])
+        #     scraper.parse()
+        # except:
+        #     http_errors._400('Bad url.')
+
+        scraper = Scraper(params['url'])
+        scraper.parse()
+
 
         post = Post()
         post.user_id = self.user.id
-        post.title = scraper.data['title']
-        post.description = scraper.data['description']
-        post.image = scraper.data['image']
-        post.host = scraper.data['host']
-        post.type = scraper.data['type']
-        post.site_name = scraper.data['site_name']
-        post.site_icon = scraper.data['site_icon']
-        post.url = scraper.data['url']
-        post.charset = scraper.data['charset']        
+        post.title = scraper.get('title')
+        post.description = scraper.get('description')
+        post.image = scraper.get('image')
+        post.host = scraper.get('host')
+        post.type = scraper.get('type')
+        post.site_name = scraper.get('site_name')
+        post.site_icon = scraper.get('site_icon')
+        post.url = scraper.get('url')
+        post.charset = scraper.get('charset')
         post.is_published = True if 'force_publish' not in params else params['force_publish']
         post.hash = post.generate_sum()
 
