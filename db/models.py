@@ -3,7 +3,7 @@ import time
 
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import relationship, backref, relation
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Table
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects import mysql
 
@@ -65,8 +65,8 @@ class PushToken(Base):
     client_types = ['IOS', 'ANDROID']
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))    
-    token = Column(String(256))    
+    user_id = Column(Integer, ForeignKey('users.id'))
+    token = Column(String(256))
     client_type = Column(mysql.ENUM(client_types), nullable = False, default=client_types[1])
     client_version = Column(String(10))
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
@@ -82,9 +82,9 @@ class AuthToken(Base):
     push_token_id = Column(Integer, ForeignKey('push_tokens.id'), nullable = False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable = False)
     token = Column(String(256), nullable = False, default = 0)
-    expires_in_sec = Column(Integer, nullable = False, default = 3200)    
+    expires_in_sec = Column(Integer, nullable = False, default = 3200)
     oauth_provider = Column(mysql.ENUM(providers))
-    last_seen_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())    
+    last_seen_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
 
     push_token = relationship('PushToken', backref='auth_tokens')
@@ -99,7 +99,7 @@ class Avatar(Base):
     is_silhouette = Column(Boolean, nullable = False, default = False)
     url = Column(String(256), nullable = False, default = 0)
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
-    user = relationship('User', backref='avatars')    
+    user = relationship('User', backref='avatars')
 
 
 class Post(Base):
@@ -119,7 +119,7 @@ class Post(Base):
     hash = Column(String(255), nullable = True)
     charset = Column(String(20), nullable = True)
     created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
-    updated_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())    
+    updated_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_published = Column(Boolean, nullable = False, default = False)
     user = relationship('User', backref='posts')
 
@@ -146,3 +146,24 @@ class Post(Base):
                 'created_date': int(time.mktime(self.updated_timestamp.timetuple())),
                 'is_published': self.is_published}
         return post
+
+class Comment(Base):
+    __tablename__ = 'comments'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable = False)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable = False)
+    comment = Column(Text, nullable = False)
+    user = relationship('User')
+    post = relationship('Post', backref='comments')
+    created_timestamp = Column(DateTime(timezone=True), nullable = False, default=func.current_timestamp())
+
+    def as_dict(self):
+        comment = {
+                'id': self.id,
+                'user_id': self.user_id,
+                'post_id': self.title,
+                'comment': self.comment,
+                'created_date': int(time.mktime(self.created_timestamp.timetuple()))
+                }
+        return comment

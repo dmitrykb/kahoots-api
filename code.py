@@ -17,11 +17,9 @@ def load_sqla(handler):
     try:
         return handler()
     except web.HTTPError:
-        print 'httperror'
         web.ctx.orm.rollback()
         raise
     except:
-        print 'error'
         web.ctx.orm.rollback()
         raise
     finally:
@@ -29,6 +27,7 @@ def load_sqla(handler):
 
 urls = (
         '/api/v1/users', 'api.v1.controllers.users.Users',
+        '/api/v1/users/([0-9]+)', 'api.v1.controllers.user.User',
         '/api/v1/users/([0-9]+)/followers', 'api.v1.controllers.followers.Followers',
         '/api/v1/users/([0-9]+)/following', 'api.v1.controllers.following.Following',
         '/api/v1/following/([0-9]+)', 'api.v1.controllers.following.Following',

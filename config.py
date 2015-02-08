@@ -20,8 +20,12 @@ db['user'] = config_ini.get('DB_MAIN', 'DB_USER', 0)
 db['password'] = config_ini.get('DB_MAIN', 'DB_PASSWORD', 0)
 db['database'] = config_ini.get('DB_MAIN', 'DB_DATABASE', 0)
 db['raise_on_warnings'] = config_ini.getboolean('DB_MAIN', 'RAISE_ON_WARNINGS')
-db_url='mysql+mysqlconnector://{0}:{1}@{2}/{3}'.format(db['user'], db['password'], db['host'], db['database']) 
+db_url='mysql+mysqlconnector://{0}:{1}@{2}/{3}'.format(db['user'], db['password'], db['host'], db['database'])
 
 # facebook auth
 client_id = config_ini.get('FACEBOOK_APP', 'CLIENT_ID', 0)
 client_secret = config_ini.get('FACEBOOK_APP', 'CLIENT_SECRET', 0)
+
+# gcm
+gcm_api_key = config_ini.get('GCM', 'GCM_API_KEY', 0)
+gcm_client_id = config_ini.get('GCM', 'GCM_CLIENT_ID', 0)

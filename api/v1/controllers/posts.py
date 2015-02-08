@@ -7,6 +7,7 @@ from db.models import *
 from api.v1.controllers.auth_controller import AuthController
 import http_errors
 from sqlalchemy.sql import and_
+from bgj.notify import *
 
 class Posts(AuthController):
 
@@ -50,14 +51,16 @@ class Posts(AuthController):
 
         # save new post
         web.ctx.orm.add(post)
-        web.ctx.orm.commit()        
+        web.ctx.orm.commit()
+
+        startpush.delay(self.user)
 
         return json.dumps(post.as_dict())
 
 
 
     '''
-        GET /posts - get feed 
+        GET /posts - get feed
     '''
 
     @validate(get_schema)
@@ -71,13 +74,13 @@ class Posts(AuthController):
         except:
             http_errors._400('Wrong date format.')
 
-        # OPTIMIZE THIS AND COVER WITH TESTS        
+        # OPTIMIZE THIS AND COVER WITH TESTS
         if 'direction' not in params or params['direction'] == 'gt':
             posts = self.get_gt(since, limit)
         else:
             posts = self.get_lt(since, limit)
         ret = []
-        for post in posts:            
+        for post in posts:
             ret.append(post.as_dict())
         return json.dumps(ret[::-1]) # reversed
 
@@ -133,5 +136,5 @@ class Posts(AuthController):
                     )\
                 )\
                 .order_by(Post.created_timestamp.desc())\
-                .all()                
+                .all()
         return posts

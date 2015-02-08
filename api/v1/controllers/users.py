@@ -8,14 +8,14 @@ from sqlalchemy.sql import and_, or_
 
 class Users():
 
-    schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True},
+    post_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True},
               {'name': 'oauth_provider', 'type': 'enum', 'allowed_values': AuthToken.providers, 'required':True},
               {'name': 'expires_in_sec', 'type': 'string', 'required':True},
               {'name': 'push_token', 'type': 'string', 'required':True},
               {'name': 'client_type', 'type': 'enum', 'allowed_values': ['IOS','ANDROID'], 'required':True},
               {'name': 'client_version', 'type': 'string', 'required':True}]
 
-    @validate(schema)
+    @validate(post_schema)
     def POST(self):
         # parse parameters
         params = json.loads(web.data())
@@ -23,7 +23,7 @@ class Users():
 
         # check if auth_token already exists in our database
         auth_token = web.ctx.orm.query(AuthToken).filter_by(token=headers['HTTP_AUTHTOKEN']).join(User).first()
-        if auth_token and auth_token.user:            
+        if auth_token and auth_token.user:
             return json.dumps(auth_token.user.as_dict())
 
         # check if push_token and user exist
@@ -39,7 +39,7 @@ class Users():
             web.ctx.orm.commit()
             return json.dumps(push_token.user.as_dict())
 
-        
+
         # create oauth provider, based on oauth provider
         oauth_provider = OAuthProviderFactory.create_provider(auth_token = headers['HTTP_AUTHTOKEN'], oauth_provider = params['oauth_provider'])
         oauth_user = oauth_provider.login()
@@ -83,7 +83,6 @@ class Users():
 
         return json.dumps(user.as_dict())
 
-
     get_schema = [{'name': 'HTTP_AUTHTOKEN', 'type': 'string', 'required':True}]
     @validate(get_schema)
     def GET(self, pattern):
@@ -101,7 +100,7 @@ class Users():
                                 User.first_name.like(pattern),\
                                 User.last_name.like(pattern)\
                                 ),\
-                               User.is_removed == False 
+                               User.is_removed == False
                             )
                         ).limit(15)
         ret = []
